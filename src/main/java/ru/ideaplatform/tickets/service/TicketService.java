@@ -81,7 +81,7 @@ public class TicketService {
         }
 
         // выводим результат в лог
-        log.info(String.format("Average price: %.2f, Median price: %.2f, Difference: %.2f", medianPrice, averagePrice,
+        log.info(String.format("Median price: %.2f, Average price: %.2f, Difference: %.2f", medianPrice, averagePrice,
                 averagePrice - medianPrice));
 
     }
