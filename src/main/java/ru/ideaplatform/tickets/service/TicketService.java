@@ -10,8 +10,7 @@ import static java.util.stream.Collectors.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.*;
 
 @Log
@@ -39,10 +38,11 @@ public class TicketService {
                 .filter(it -> it.getOriginName().equals(ORIGIN_NAME)
                         && it.getDestinationName().equals(DESTINATION_NAME)) // фильтруем по направлению
                 .peek(it -> {
-                    Duration duration = Duration.between(it.getDepartureTime(), it.getArrivalTime());
-                    it.setFlightTime(LocalTime.of(
-                            (int) duration.toHours(),
-                            (int) (duration.toMinutes() - (duration.toHours() * 60))));
+                    Long minutes = mapperLocalDateTimeToMinutes(it.getDepartureDate(), it.getDepartureTime(),
+                            it.getArrivalDate(), it.getArrivalTime());
+                    log.info(String.valueOf(minutes));
+                    it.setFlightTime(minutes);
+                    log.info(it.getFlightTime().toString());
                 }) // заполняем время перелета
                 // группируем в map, где ключ - название перевозчика,
                 // значение минимальное время перелета.
@@ -50,8 +50,7 @@ public class TicketService {
                         minBy(Comparator.comparing(Ticket::getFlightTime))));
         // выводим результат в log
         carriers.forEach((k, v) -> log
-                .info(String.format("Carrier: %s, minTime: %s", k, v.orElseThrow()
-                        .getFlightTime())));
+                .info(minutesToString(v.orElseThrow().getFlightTime())));
     }
 
     /**
@@ -93,11 +92,34 @@ public class TicketService {
     private static Flight ticketsToPOJO() {
         Flight flight;
         try {
-            File file = new File("src/main/resources/tickets.json");
+            File file = new File("src/main/resources/tickets_new.json");
             flight = objectMapper.readValue(file, Flight.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return flight;
+    }
+
+    private static Long mapperLocalDateTimeToMinutes(LocalDate departureDate, LocalTime departureTime,
+                                                     LocalDate arrivalDate, LocalTime arrivalTime) {
+
+        LocalDateTime departure = LocalDateTime.of(departureDate, departureTime);
+        LocalDateTime arrival = LocalDateTime.of(arrivalDate, arrivalTime);
+
+        return Duration.between(departure, arrival).toMinutes();
+    }
+
+    public static String minutesToString(long minutes) {
+        long hours = minutes / 60;
+        long days = hours / 24;
+        long hoursResult = hours - (days * 24);
+        long minutesResult = minutes - (hours * 60);
+        if (hours > 24) {
+            return days + "/days " + hoursResult + "/hours " + minutesResult + "/minutes";
+        } else if (minutes <= 60) {
+            return minutes + "/minutes";
+        } else {
+            return hours + "/hours " + minutesResult + "/minutes";
+        }
     }
 }

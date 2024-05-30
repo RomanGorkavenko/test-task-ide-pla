@@ -44,7 +44,7 @@ public class Ticket {
 
     @Setter
     @JsonIgnore
-    private LocalTime flightTime;
+    private Long flightTime;
 
     /**
      * В ТЗ ничего не сказано про тип
