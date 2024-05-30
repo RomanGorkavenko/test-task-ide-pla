@@ -40,9 +40,7 @@ public class TicketService {
                 .peek(it -> {
                     Long minutes = mapperLocalDateTimeToMinutes(it.getDepartureDate(), it.getDepartureTime(),
                             it.getArrivalDate(), it.getArrivalTime());
-                    log.info(String.valueOf(minutes));
-                    it.setFlightTime(minutes);
-                    log.info(it.getFlightTime().toString());
+                    it.setFlightTime(minutes); // не стал писать в одну строку для читаемости
                 }) // заполняем время перелета
                 // группируем в map, где ключ - название перевозчика,
                 // значение минимальное время перелета.
@@ -100,6 +98,14 @@ public class TicketService {
         return flight;
     }
 
+    /**
+     * Соединяет дату и время для вылета и прилета.
+     * @param departureDate дата вылета
+     * @param departureTime время вылета
+     * @param arrivalDate дата прилета
+     * @param arrivalTime время прилета
+     * @return минуты затраченные на перелет.
+     */
     private static Long mapperLocalDateTimeToMinutes(LocalDate departureDate, LocalTime departureTime,
                                                      LocalDate arrivalDate, LocalTime arrivalTime) {
 
@@ -109,6 +115,11 @@ public class TicketService {
         return Duration.between(departure, arrival).toMinutes();
     }
 
+    /**
+     * Переводит минуты в строку
+     * @param minutes минуты
+     * @return строку с информацией о времени перелета
+     */
     public static String minutesToString(long minutes) {
         long hours = minutes / 60;
         long days = hours / 24;
