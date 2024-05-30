@@ -48,7 +48,7 @@ public class TicketService {
                         minBy(Comparator.comparing(Ticket::getFlightTime))));
         // выводим результат в log
         carriers.forEach((k, v) -> log
-                .info(minutesToString(v.orElseThrow().getFlightTime())));
+                .info("Carrier: " + k + " " + minutesToString(v.orElseThrow().getFlightTime())));
     }
 
     /**
